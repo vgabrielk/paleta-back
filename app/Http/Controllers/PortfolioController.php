@@ -5,9 +5,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreatePortfolioRequest;
+use App\Http\Requests\PortfolioRequest;
 use App\Http\Requests\UpdatePortfolioRequest;
 use App\Models\Portfolio;
+use App\Models\Template;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
 
 class PortfolioController extends Controller
 {
@@ -17,32 +22,16 @@ class PortfolioController extends Controller
         return response()->json($portfolios);
     }
 
-    public function store(Request $request)
+    public function store(PortfolioRequest $request)
     {
-        $request->validate([
-            'data' => 'required|array',
-            'data.name' => 'required|string|max:255',
-            'data.title' => 'nullable|string|max:255',
-            'data.description' => 'nullable|string',
-            'data.avatar' => 'nullable|url',
-            'data.links' => 'array|nullable',
-            'data.links.*.label' => 'required|string',
-            'data.links.*.url' => 'required|url',
-            'data.experiences' => 'array|nullable',
-            'data.experiences.*.role' => 'required|string',
-            'data.experiences.*.company' => 'required|string',
-            'data.experiences.*.period' => 'required|string',
-            'data.experiences.*.description' => 'nullable|string',
-            'data.education' => 'array|nullable',
-            'data.education.*.course' => 'required|string',
-            'data.education.*.institution' => 'required|string',
-            'data.education.*.period' => 'required|string',
-        ]);
+        $validated = $request->validated();
+
+        $template = Template::where('type', $validated['template_type'])->first();
 
         $portfolio = Portfolio::create([
             'user_id' => auth('api')->user()->id,
-            'template_id' => $request->input('data.template_id', null),
             'data' => $request->input('data'),
+            'template_id' => $template->id,
         ]);
 
         return response()->json($portfolio, 201);
@@ -55,33 +44,24 @@ class PortfolioController extends Controller
         return response()->json($portfolio);
     }
 
-    public function update(Request $request, Portfolio $portfolio)
+    public function update(PortfolioRequest $request, Portfolio $portfolio)
     {
-        $validated = $request->validate([
-            'data' => 'required|array',
-            'data.name' => 'required|string|max:255',
-            'data.title' => 'nullable|string|max:255',
-            'data.description' => 'nullable|string',
-            'data.avatar' => 'nullable|url',
-            'data.template_id' => 'nullable|integer|exists:templates,id',
-            'data.links' => 'array|nullable',
-            'data.links.*.label' => 'required|string',
-            'data.links.*.url' => 'required|url',
-            'data.experiences' => 'array|nullable',
-            'data.experiences.*.role' => 'required|string',
-            'data.experiences.*.company' => 'required|string',
-            'data.experiences.*.period' => 'required|string',
-            'data.experiences.*.description' => 'nullable|string',
-            'data.education' => 'array|nullable',
-            'data.education.*.course' => 'required|string',
-            'data.education.*.institution' => 'required|string',
-            'data.education.*.period' => 'required|string',
-        ]);
+        $validated = $request->validated();
 
-        $portfolio->update([
-            'data' => $validated['data'],
-            'template_id' => $validated['data']['template_id'] ?? $portfolio->template_id,
-        ]);
+        if (!empty($validated['template_type'])) {
+            $template = Template::where('type', $validated['template_type'])->first();
+            if ($template) {
+                $portfolio->template_id = $template->id;
+            }
+        }
+
+        if (!empty($validated['data'])) {
+
+            $portfolio->data = $validated['data'];
+            $portfolio->user_id = auth('api')->user()->id;
+        }
+
+        $portfolio->save();
 
         return response()->json($portfolio);
     }
