@@ -1,0 +1,17 @@
+<?php
+
+namespace {{ namespace }};
+
+{{ factoryImport }}
+use Illuminate\Database\Eloquent\Model;
+use App\Traits\BelongsToTenant;
+
+class {{ class }} extends Model
+{
+    use BelongsToTenant;
+    {{ factory }}
+
+        protected $fillable = [
+            'tenant_id'
+        ];
+}
