@@ -15,7 +15,10 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
     public function register(): void
     {
         // Telescope::night();
-
+        if (env('TELESCOPE_ENABLED', false)) {
+            Telescope::ignoreMigrations(); // Se quiser evitar rodar as migrations dele
+            Telescope::start();
+        }
         $this->hideSensitiveRequestDetails();
 
         $isLocal = $this->app->environment('local');
