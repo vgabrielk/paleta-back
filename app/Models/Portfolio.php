@@ -70,4 +70,21 @@ class Portfolio extends Model
     {
         return $this->data['projects'] ?? [];
     }
+    public function getSkillsAttribute()
+    {
+        return $this->data['skills'] ?? [];
+    }
+
+    public function getDataValue(string $key, mixed $default = null): mixed
+    {
+        return $this->data[$key] ?? $default;
+    }
+
+    public function setDataValue(string $key, mixed $value): void
+    {
+        $data = $this->data ?? [];
+        $data[$key] = $value;
+        $this->data = $data;
+    }
+
 }

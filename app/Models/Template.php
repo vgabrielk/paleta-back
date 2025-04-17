@@ -10,5 +10,8 @@ class Template extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nome', 'slug', 'descricao', 'preview_url'];
+    protected $fillable = [
+        'name',
+        'type',
+    ];
 }

@@ -13,10 +13,8 @@ return new class extends Migration
   {
       Schema::create('templates', function (Blueprint $table) {
           $table->id();
-          $table->string('nome');
-          $table->string('slug')->unique();
-          $table->text('descricao')->nullable();
-          $table->string('preview_url')->nullable();
+          $table->string('name');
+          $table->enum('type', ['free', 'premium'])->default('free');
           $table->timestamps();
       });
   }

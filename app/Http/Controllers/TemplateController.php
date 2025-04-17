@@ -2,20 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Template;
-use Illuminate\Http\Request;
+use App\Http\Services\TemplateService;
 
 class TemplateController extends Controller
 {
+
+    protected TemplateService $templateService;
+    public function __construct(TemplateService $templateService)
+    {
+        $this->templateService = $templateService;
+    }
     public function index()
     {
-        $templates = Template::all();
-        return response()->json($templates);
+        return $this->templateService->getTemplate();
     }
 
     public function show($id)
     {
-        $template = Template::findOrFail($id);
-        return response()->json($template);
+        return $this->templateService->get($id);
     }
 }
